@@ -116,3 +116,40 @@ logDate(new Date());
 
 ### Monitoring and Alerts
 مانیتورینگ دقیق سیستم برای شناسایی سریع مشکلات و اطلاع‌رسانی به مدیران سیستم در صورت وقوع Retry Storm. این کمک می‌کند تا اقدامات به‌موقع برای کاهش تأثیر منفی این مشکلات انجام شود.
+
+
+
+## 6. Chatty I/O Antipattern
+به الگویی در برنامه‌نویسی اشاره دارد که در آن یک برنامه به طور مکرر و بیش از حد با سیستم‌های خارجی مانند پایگاه‌های داده یا سرویس‌های وب ارتباط برقرار می‌کند، و در نتیجه باعث می‌شود تعداد درخواست‌ها و پاسخ‌ها بین کلاینت و سرور به شدت افزایش یابد. این مشکل معمولاً منجر به کاهش عملکرد و زمان پاسخگویی طولانی‌تر می‌شود، چرا که هر درخواست شبکه ممکن است دارای تأخیر شبکه باشد و منابع سرور را درگیر کند.
+
+مشکلات ناشی از Chatty I/O
+کاهش کارایی: بارگذاری شدید بر شبکه و تأخیرات متعدد می‌تواند کارایی کلی سیستم را کاهش دهد.
+بهره‌وری پایین سرور: سرورها باید بار بیشتری از درخواست‌ها را پردازش کنند، که می‌تواند منجر به استفاده ناکارآمد از CPU و حافظه شود.
+تجربه کاربری ضعیف: تجربه کاربری می‌تواند به دلیل زمان بارگذاری بالا و پاسخگویی کند تحت تأثیر قرار گیرد.
+```javascript
+function fetchCustomerData(customerId) {
+    fetch(`/api/customers/${customerId}/contact`).then(response => response.json()).then(contact => {
+        console.log(contact);
+    });
+    fetch(`/api/customers/${customerId}/orders`).then(response => response.json()).then(orders => {
+        console.log(orders);
+    });
+    fetch(`/api/customers/${customerId}/recommendations`).then(response => response.json()).then(recommendations => {
+        console.log(recommendations);
+    });
+}
+```
+
+خب بیایم یک کد ساده بهبود یافته شو ببینیم
+
+```javascript
+async function fetchCustomerData(customerId) {
+    try {
+        const response = await fetch(`/api/customers/${customerId}/fullProfile`);
+        const customerData = await response.json();
+        console.log(customerData);
+    } catch (error) {
+        console.error('Failed to fetch customer data:', error);
+    }
+}
+```
