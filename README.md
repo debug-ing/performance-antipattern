@@ -153,3 +153,43 @@ async function fetchCustomerData(customerId) {
     }
 }
 ```
+
+## 7.Synchronous I/O Antipattern
+
+یک الگوی طراحی نامناسب در توسعه نرم‌افزار است که در آن برنامه‌ها منتظر پایان یک عملیات ورودی/خروجی (I/O) می‌مانند قبل از اینکه بتوانند ادامه دهند. این شیوه معمولاً منجر به بلاک شدن رشته‌ها یا پردازش‌هایی می‌شود که می‌توانند بدون انتظار برای تکمیل عملیات I/O فعالیت‌های دیگری انجام دهند. در محیط‌هایی که به عملکرد بالا نیاز است یا محیط‌هایی که منابع محدود هستند، استفاده از I/O همزمان می‌تواند به شدت مضر باشد و منجر به تجربیات کاربری ضعیف و کارایی پایین شود.
+
+مشکلات ناشی از Synchronous I/O
+بلاک شدن عملیات: هنگامی که پردازش برای تکمیل یک عملیات I/O بلاک می‌شود، منابعی مانند CPU و حافظه ممکن است زیر استفاده بمانند، چرا که برنامه قادر به انجام دیگر فعالیت‌ها نیست.
+کاهش پاسخگویی: در برنامه‌هایی که به پاسخگویی بالا نیاز دارند، مانند برنامه‌های تعاملی یا برنامه‌های وب، بلاک شدن عملیات I/O می‌تواند باعث تأخیر در پاسخگویی به کاربران شود.
+مشکلات مقیاس‌پذیری: در محیط‌هایی که باید درخواست‌های متعدد را به طور همزمان پردازش کنند، مدل I/O همزمان محدودیت‌های قابل توجهی ایجاد می‌کند.
+```javascript
+const fs = require('fs');
+
+function readFileSync() {
+    console.log('Starting synchronous file read.');
+    const data = fs.readFileSync('file.txt', 'utf8');
+    console.log(data);
+    console.log('Finished synchronous file read.');
+}
+
+readFileSync();
+```
+
+و یک کد بهبود یافته ازشم ببینیم
+```javascript
+const fs = require('fs');
+
+function readFileAsync() {
+    console.log('Starting asynchronous file read.');
+    fs.readFile('file.txt', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading file:', err);
+            return;
+        }
+        console.log(data);
+        console.log('Finished asynchronous file read.');
+    });
+}
+
+readFileAsync();
+```
